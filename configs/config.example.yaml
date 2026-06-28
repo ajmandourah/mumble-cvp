@@ -1,0 +1,24 @@
+# Mumble CVP Configuration
+# Copy to config.yaml and set MUMBLE_CVP_CONFIG env var, or place at configs/config.yaml for auto-detect.
+
+mumble:
+  # Murmur ICE host address
+  host: "127.0.0.1"
+  # Murmur ICE port (default: 6502)
+  port: 6502
+  # ICE secret (matches icesecretread or icesecretwrite in Murmur config)
+  secret: ""
+  # Server ID to query (0 = auto-detect first booted server)
+  server_id: 0
+
+http:
+  # Listen address for the HTTP server
+  host: "0.0.0.0"
+  # Listen port for the HTTP server
+  port: 4000
+
+log:
+  # Log level: debug, info, warn, error
+  level: "info"
+  # Log format: json or text
+  format: "json"

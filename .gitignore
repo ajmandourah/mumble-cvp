@@ -1,0 +1,6 @@
+./configs/config.yaml
+AAGENTS.md
+./mumble-cvp
+__pycache__/
+*.pyc
+

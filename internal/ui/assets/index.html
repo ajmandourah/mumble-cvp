@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mumble CVP</title>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3/dist/cdn.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+.container { max-width: 960px; margin: 0 auto; padding: 2rem 1rem; }
+header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+h1 { font-size: 1.5rem; font-weight: 600; color: #f8fafc; }
+.status { font-size: 0.875rem; color: #64748b; }
+.status.ok { color: #22c55e; }
+.status.err { color: #ef4444; }
+.card { background: #1e293b; border-radius: 0.5rem; padding: 1.5rem; margin-bottom: 1rem; }
+.card h2 { font-size: 1.125rem; margin-bottom: 1rem; color: #f1f5f9; }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 0.5rem 0.75rem; border-bottom: 1px solid #334155; }
+th { font-size: 0.75rem; text-transform: uppercase; color: #94a3b8; font-weight: 500; }
+td { font-size: 0.875rem; }
+.badge { display: inline-block; padding: 0.125rem 0.5rem; border-radius: 9999px; font-size: 0.75rem; }
+.badge.mute { background: #7f1d1d; color: #fca5a5; }
+.badge.deaf { background: #4c1d95; color: #d8b4fe; }
+.badge.suppress { background: #713f12; color: #fde047; }
+.badge.priority { background: #14532d; color: #86efac; }
+.badge.online { background: #14532d; color: #86efac; }
+.empty { color: #64748b; font-style: italic; padding: 1rem 0; }
+</style>
+</head>
+<body>
+<div class="container" x-data="app()">
+  <header>
+    <h1>Mumble Monitor</h1>
+    <span class="status" :class="statusClass">
+      <span x-text="statusText"></span>
+    </span>
+  </header>
+
+  <div class="card">
+    <h2>Online Users (<span x-text="userCount"></span>)</h2>
+    <table x-show="users.length > 0">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Channel</th>
+          <th>Status</th>
+          <th>Version</th>
+          <th>Platform</th>
+        </tr>
+      </thead>
+      <tbody>
+        <template x-for="u in users" :key="u.session">
+          <tr>
+            <td x-text="u.name"></td>
+            <td x-text="u.channel"></td>
+            <td>
+              <template x-if="u.self_mute"><span class="badge mute">M</span></template>
+              <template x-if="u.self_deaf"><span class="badge deaf">D</span></template>
+              <template x-if="u.mute"><span class="badge mute">m</span></template>
+              <template x-if="u.deaf"><span class="badge deaf">d</span></template>
+              <template x-if="u.suppress"><span class="badge suppress">S</span></template>
+              <template x-if="u.priority"><span class="badge priority">P</span></template>
+            </td>
+            <td x-text="u.version"></td>
+            <td x-text="u.platform"></td>
+          </tr>
+        </template>
+      </tbody>
+    </table>
+    <p class="empty" x-show="users.length === 0">No users online</p>
+  </div>
+
+  <div class="card">
+    <h2>Channels</h2>
+    <table x-show="channels.length > 0">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Users</th>
+          <th>Password</th>
+        </tr>
+      </thead>
+      <tbody>
+        <template x-for="ch in channels" :key="ch.id">
+          <tr>
+            <td x-text="ch.id"></td>
+            <td x-text="ch.name"></td>
+            <td x-text="channelUserCount(ch.id)"></td>
+            <td x-text="ch.password_set ? 'yes' : ''"></td>
+          </tr>
+        </template>
+      </tbody>
+    </table>
+    <p class="empty" x-show="channels.length === 0">No channels</p>
+  </div>
+</div>
+
+<script>
+function app() {
+  return {
+    users: [],
+    channels: [],
+    statusText: 'connecting...',
+    statusClass: '',
+    interval: null,
+
+    async init() {
+      await this.fetch();
+      this.interval = setInterval(() => this.fetch(), 5000);
+    },
+
+    async fetch() {
+      try {
+        const [uRes, cRes] = await Promise.all([
+          fetch('/api/users'),
+          fetch('/api/channels')
+        ]);
+        const treeRes = await fetch('/api/tree/0');
+        const tree = await treeRes.json();
+
+        this.users = flattenUsers(tree).map(u => ({
+          ...u,
+          channel: findChannelName(tree, u.channel_id)
+        }));
+        this.channels = extractChannels(tree);
+        this.statusText = 'connected';
+        this.statusClass = 'ok';
+      } catch (e) {
+        this.statusText = 'disconnected';
+        this.statusClass = 'err';
+      }
+    },
+
+    channelUserCount(id) {
+      return this.users.filter(u => u.channel_id === id).length;
+    }
+  };
+}
+
+function flattenUsers(tree) {
+  let result = [...tree.users];
+  for (const child of tree.children) {
+    result = result.concat(flattenUsers(child));
+  }
+  return result;
+}
+
+function extractChannels(tree) {
+  let result = [tree.channel];
+  for (const child of tree.children) {
+    result = result.concat(extractChannels(child));
+  }
+  return result;
+}
+
+function findChannelName(tree, id) {
+  if (tree.channel.id === id) return tree.channel.name;
+  for (const child of tree.children) {
+    const name = findChannelName(child, id);
+    if (name) return name;
+  }
+  return '';
+}
+</script>
+</body>
+</html>
