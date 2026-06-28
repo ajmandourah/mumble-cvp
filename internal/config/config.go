@@ -1,7 +1,9 @@
 package config
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 )
@@ -36,7 +38,11 @@ func Load(path string) (*Config, error) {
 		path = os.Getenv("MUMBLE_CVP_CONFIG")
 	}
 	if path == "" {
-		path = "configs/config.yaml"
+		exe, err := os.Executable()
+		if err != nil {
+			return nil, fmt.Errorf("get executable path: %w", err)
+		}
+		path = filepath.Join(filepath.Dir(exe), "config.yaml")
 	}
 
 	data, err := os.ReadFile(path)

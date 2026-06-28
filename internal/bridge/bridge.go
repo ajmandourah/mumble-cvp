@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"time"
 )
 
@@ -55,7 +56,38 @@ type Channel struct {
 	PasswordSet bool   `json:"password_set"`
 }
 
+var pythonVersionRe = regexp.MustCompile(`^Python (\d+)\.(\d+)`)
+
+func checkPythonVersion() error {
+	out, err := exec.Command("python3", "--version").CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("python3 not found: %w (output: %s)", err, string(out))
+	}
+	matches := pythonVersionRe.FindStringSubmatch(string(out))
+	if matches == nil {
+		return fmt.Errorf("unable to parse python3 version: %s", string(out))
+	}
+	major := parseInt(matches[1])
+	minor := parseInt(matches[2])
+	if major < 3 || (major == 3 && minor < 14) {
+		return fmt.Errorf("python 3.14 or higher required, found %s", matches[0])
+	}
+	return nil
+}
+
+func parseInt(s string) int {
+	var n int
+	for _, c := range s {
+		n = n*10 + int(c-'0')
+	}
+	return n
+}
+
 func New(bridgeDir string, port int) (*Client, error) {
+	if err := checkPythonVersion(); err != nil {
+		return nil, fmt.Errorf("python version check: %w", err)
+	}
+
 	cmd := exec.Command("python3", filepath.Join(bridgeDir, "bridge.py"), fmt.Sprintf("%d", port))
 	cmd.Stdout = nil
 	cmd.Stderr = nil

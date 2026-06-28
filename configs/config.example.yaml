@@ -1,5 +1,6 @@
 # Mumble CVP Configuration
-# Copy to config.yaml and set MUMBLE_CVP_CONFIG env var, or place at configs/config.yaml for auto-detect.
+# Place as config.yaml in the same directory as the executable for auto-detect.
+# Or set MUMBLE_CVP_CONFIG env var to point to any config file.
 
 mumble:
   # Murmur ICE host address
