@@ -94,22 +94,6 @@
             </svg>
             Users
           </a>
-          <a
-            class="sidebar-link"
-            :class="page === 'activity' ? 'active' : ''"
-            @click="page = 'activity'"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-            </svg>
-            Activity
-          </a>
-
           <div class="sidebar-section">System</div>
           <a
             class="sidebar-link"
@@ -534,30 +518,6 @@
               </div>
             </div>
 
-            <!-- Activity Chart -->
-            <div class="card">
-              <div class="card-header">
-                <span class="card-title">Activity (7 days)</span>
-                <span class="text-xs text-muted">Avg sessions</span>
-              </div>
-              <div class="card-body">
-                <div class="flex items-end gap-3 h-36">
-                  <template x-for="(d, i) in activityData" :key="i">
-                    <div class="flex-1 flex flex-col items-center gap-1">
-                      <div
-                        class="chart-bar w-full"
-                        :style="'height:' + d.h + '%; background: ' + (d.h > 60 ? 'var(--accent)' : 'var(--surface-3)')"
-                        style="min-height: 4px"
-                      ></div>
-                      <span
-                        class="text-[10px] text-muted"
-                        x-text="d.label"
-                      ></span>
-                    </div>
-                  </template>
-                </div>
-              </div>
-            </div>
           </div>
 
           <!-- ═══ CHANNELS ═══ -->
@@ -859,82 +819,6 @@
             </template>
           </div>
 
-          <!-- ═══ ACTIVITY ═══ -->
-          <div x-show="page === 'activity'">
-            <div class="card mb-4">
-              <div class="card-header">
-                <span class="card-title">Activity Overview</span>
-              </div>
-              <div class="card-body">
-                <div class="flex items-end gap-3 h-48 mb-4">
-                  <template x-for="(d, i) in activityData" :key="i">
-                    <div class="flex-1 flex flex-col items-center gap-1">
-                      <span
-                        class="text-xs font-semibold mono"
-                        x-text="d.val"
-                      ></span>
-                      <div
-                        class="chart-bar w-full"
-                        :style="'height:' + d.h + '%; background: ' + (d.h > 60 ? 'var(--accent)' : 'var(--surface-3)')"
-                        style="min-height: 4px"
-                      ></div>
-                      <span
-                        class="text-[10px] text-muted"
-                        x-text="d.label"
-                      ></span>
-                    </div>
-                  </template>
-                </div>
-              </div>
-            </div>
-            <div class="terminal">
-              <div class="terminal-bar">
-                <span
-                  class="terminal-dot"
-                  style="background: var(--red)"
-                ></span>
-                <span
-                  class="terminal-dot"
-                  style="background: var(--amber)"
-                ></span>
-                <span
-                  class="terminal-dot"
-                  style="background: var(--green)"
-                ></span>
-                <span class="text-xs text-muted ml-2 mono">server.log</span>
-                <label
-                  class="flex items-center gap-1 text-xs text-muted ml-auto cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    x-model="autoScroll"
-                    class="w-auto"
-                  />Auto
-                </label>
-              </div>
-              <div class="terminal-body" x-ref="logBody">
-                <template x-if="logEntries.length === 0">
-                  <div class="text-muted text-sm">
-                    Waiting for log entries...
-                  </div>
-                </template>
-                <template x-for="entry in logEntries" :key="entry.timestamp">
-                  <div class="terminal-line">
-                    <span
-                      class="terminal-ts"
-                      x-text="formatTime(entry.timestamp)"
-                    ></span>
-                    <span
-                      class="terminal-msg"
-                      :class="logLevel(entry.text)"
-                      x-text="entry.text"
-                    ></span>
-                  </div>
-                </template>
-              </div>
-            </div>
-          </div>
-
           <!-- ═══ BANS ═══ -->
           <div x-show="page === 'bans'">
             <div class="flex items-center justify-between mb-4">
@@ -1108,7 +992,6 @@
               overview: "Overview",
               channels: "Channels",
               users: "Users",
-              activity: "Activity",
               bans: "Bans",
               listening: "Listeners",
             };
@@ -1129,18 +1012,6 @@
 
           get uptimeText() {
             return formatDuration(this.stats.uptime);
-          },
-
-          get activityData() {
-            const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-            return days.map((d, i) => ({
-              label: d,
-              val: Math.max(
-                1,
-                this.users.length + Math.floor(Math.random() * 5),
-              ),
-              h: Math.min(95, 20 + Math.random() * 70),
-            }));
           },
 
           // Build a flat list of channels with depth info for tree rendering
