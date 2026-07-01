@@ -24,6 +24,8 @@ type MumbleConfig struct {
 type HTTPConfig struct {
 	Host string `yaml:"host"`
 	Port int    `yaml:"port"`
+	User string `yaml:"user"`
+	Pass string `yaml:"pass"`
 }
 
 type LogConfig struct {

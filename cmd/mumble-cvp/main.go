@@ -41,7 +41,7 @@ func main() {
 	log.Info("bridge started", "port", bridgePort)
 
 	mux := http.NewServeMux()
-	srv := httppkg.New(br, cfg.Mumble)
+	srv := httppkg.New(br, cfg.Mumble, cfg.HTTP)
 	srv.RegisterRoutes(mux)
 	ui.RegisterRoutes(mux)
 

@@ -1,0 +1,17 @@
+mumble:
+  host: "127.0.0.1"
+  port: 6502
+  secret: ""
+  server_id: 0
+
+http:
+  host: "0.0.0.0"
+  port: 4000
+  # HTTP basic auth for both homepage and admin panel.
+  # Leave both empty to disable.
+  user: ""
+  pass: ""
+
+log:
+  level: "info"
+  format: "json"

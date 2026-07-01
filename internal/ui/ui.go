@@ -14,8 +14,12 @@ func RegisterRoutes(mux *http.ServeMux) {
 	if err != nil {
 		return
 	}
+
 	mux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFileFS(w, r, fsys, "index.html")
 	})
-	mux.Handle("GET /assets/", http.FileServer(http.FS(fsys)))
+	mux.HandleFunc("GET /admin", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFileFS(w, r, fsys, "admin.html")
+	})
+	mux.Handle("GET /assets/", http.StripPrefix("/assets", http.FileServer(http.FS(fsys))))
 }

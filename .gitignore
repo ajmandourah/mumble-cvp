@@ -1,7 +1,8 @@
-./configs/config.yaml
 config.yaml
-AAGENTS.md
-./mumble-cvp
+mumble-cvp
+AGENTS.md
+plan.md
+node_modules/
+.pi/
 __pycache__/
 *.pyc
-

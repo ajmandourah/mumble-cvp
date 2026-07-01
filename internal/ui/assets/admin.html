@@ -1,0 +1,1849 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>mumble-cvp · Admin</title>
+    <link rel="stylesheet" href="/assets/shared.css" />
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+  </head>
+  <body>
+    <div x-data="adminApp()" class="app-shell">
+      <div
+        class="sidebar-overlay"
+        :class="sidebarOpen ? 'open' : ''"
+        @click="sidebarOpen = false"
+      ></div>
+
+      <!-- ════════ SIDEBAR ════════ -->
+      <aside class="sidebar" :class="sidebarOpen ? 'open' : ''">
+        <div class="sidebar-brand">
+          <svg
+            class="w-5 h-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="var(--red)"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+            />
+          </svg>
+          mumble-cvp <span class="badge badge-red ml-1 text-[10px]">Admin</span>
+        </div>
+
+        <nav class="sidebar-nav">
+          <div class="sidebar-section">Platform</div>
+          <a
+            class="sidebar-link"
+            :class="page === 'overview' ? 'active' : ''"
+            @click="page = 'overview'"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+            System Overview
+          </a>
+          <a
+            class="sidebar-link"
+            :class="page === 'users' ? 'active' : ''"
+            @click="page = 'users'"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="4" />
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+              <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg>
+            User Management
+          </a>
+          <a
+            class="sidebar-link"
+            :class="page === 'channels' ? 'active' : ''"
+            @click="page = 'channels'"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+              />
+            </svg>
+            Channels
+          </a>
+
+          <div class="sidebar-section">Security</div>
+          <a
+            class="sidebar-link"
+            :class="page === 'bans' ? 'active' : ''"
+            @click="page = 'bans'"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+            </svg>
+            Bans
+          </a>
+          <a
+            class="sidebar-link"
+            :class="page === 'acl' ? 'active' : ''"
+            @click="page = 'acl'"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            ACL & Groups
+          </a>
+
+          <div class="sidebar-section">Operations</div>
+          <a
+            class="sidebar-link"
+            :class="page === 'messages' ? 'active' : ''"
+            @click="page = 'messages'"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+              />
+            </svg>
+            Messages
+          </a>
+          <a
+            class="sidebar-link"
+            :class="page === 'registered' ? 'active' : ''"
+            @click="page = 'registered'"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+              />
+              <polyline points="14 2 14 8 20 8" />
+            </svg>
+            Registered
+          </a>
+          <a
+            class="sidebar-link"
+            :class="page === 'config' ? 'active' : ''"
+            @click="page = 'config'"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"
+              />
+            </svg>
+            Configuration
+          </a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <a href="/" class="sidebar-link">
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path
+                d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+              />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+            Back to Dashboard
+          </a>
+        </div>
+      </aside>
+
+      <!-- ════════ MAIN AREA ════════ -->
+      <main class="main-area">
+        <header class="topbar">
+          <div class="flex items-center gap-3">
+            <button
+              class="btn-ghost p-1.5 rounded-lg md:hidden"
+              @click="sidebarOpen = !sidebarOpen"
+            >
+              <svg
+                class="w-5 h-5"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </button>
+            <span class="topbar-title" x-text="pageTitle"></span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="badge badge-red">
+              <span class="badge-dot bg-red"></span>
+              Admin
+            </span>
+          </div>
+        </header>
+
+        <div class="content">
+          <!-- ═══ SYSTEM OVERVIEW ═══ -->
+          <div x-show="page === 'overview'">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <div class="kpi">
+                <div class="kpi-icon" style="background: var(--accent-dim)">
+                  <svg
+                    class="w-5 h-5 text-[var(--accent)]"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  </svg>
+                </div>
+                <div class="kpi-value" x-text="users.length">0</div>
+                <div class="kpi-label">Active Users</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-icon" style="background: var(--green-dim)">
+                  <svg
+                    class="w-5 h-5 text-[var(--green)]"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+                    />
+                  </svg>
+                </div>
+                <div class="kpi-value" x-text="channels.length">0</div>
+                <div class="kpi-label">Channels</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-icon" style="background: var(--red-dim)">
+                  <svg
+                    class="w-5 h-5 text-[var(--red)]"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                  </svg>
+                </div>
+                <div class="kpi-value" x-text="bans.length">0</div>
+                <div class="kpi-label">Active Bans</div>
+              </div>
+              <div class="kpi">
+                <div class="kpi-icon" style="background: var(--purple-dim)">
+                  <svg
+                    class="w-5 h-5 text-[var(--purple)]"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
+                </div>
+                <div class="kpi-value mono" x-text="uptimeText">0s</div>
+                <div class="kpi-label">Server Uptime</div>
+              </div>
+            </div>
+
+            <div class="terminal">
+              <div class="terminal-bar">
+                <span
+                  class="terminal-dot"
+                  style="background: var(--red)"
+                ></span>
+                <span
+                  class="terminal-dot"
+                  style="background: var(--amber)"
+                ></span>
+                <span
+                  class="terminal-dot"
+                  style="background: var(--green)"
+                ></span>
+                <span class="text-xs text-muted ml-2 mono">system.log</span>
+                <label
+                  class="flex items-center gap-1 text-xs text-muted ml-auto cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    x-model="autoScroll"
+                    class="w-auto"
+                  />Auto
+                </label>
+              </div>
+              <div class="terminal-body" x-ref="logBody">
+                <template x-if="logEntries.length === 0">
+                  <div class="text-muted text-sm">
+                    Waiting for log entries...
+                  </div>
+                </template>
+                <template x-for="entry in logEntries" :key="entry.timestamp">
+                  <div class="terminal-line">
+                    <span
+                      class="terminal-ts"
+                      x-text="formatTime(entry.timestamp)"
+                    ></span>
+                    <span
+                      class="terminal-msg"
+                      :class="logLevel(entry.text)"
+                      x-text="entry.text"
+                    ></span>
+                  </div>
+                </template>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ USER MANAGEMENT ═══ -->
+          <div x-show="page === 'users'">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="font-semibold text-base">User Management</h2>
+              <span
+                class="badge badge-muted"
+                x-text="users.length + ' online'"
+              ></span>
+            </div>
+            <template x-if="loading">
+              <div class="empty-state">
+                <svg
+                  class="w-8 h-8"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2m0 16v2M2 12h2m16 0h2" />
+                </svg>
+                <span class="text-sm">Loading users...</span>
+              </div>
+            </template>
+            <template x-if="!loading && users.length === 0">
+              <div class="empty-state">
+                <svg
+                  class="w-8 h-8"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                </svg>
+                <span class="text-sm">No users online</span>
+              </div>
+            </template>
+            <template x-if="!loading && users.length > 0">
+              <div class="flex flex-col gap-2">
+                <template x-for="user in users" :key="user.session">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="flex items-center gap-3">
+                        <div
+                          class="avatar"
+                          :style="'background: ' + avatarColor(user.name)"
+                          x-text="user.name ? user.name.charAt(0).toUpperCase() : '?'"
+                        ></div>
+                        <div class="min-w-0 flex-1">
+                          <div
+                            class="font-medium text-sm"
+                            x-text="user.name || 'Unknown'"
+                          ></div>
+                          <div
+                            class="text-xs text-secondary"
+                            x-text="channelName(user.channel_id)"
+                          ></div>
+                        </div>
+                        <div
+                          class="flex items-center gap-1.5 flex-wrap justify-end"
+                        >
+                          <template x-if="user.priority_speaker"
+                            ><span class="badge badge-blue">pri</span></template
+                          >
+                          <template x-if="user.mute"
+                            ><span class="badge badge-red">mute</span></template
+                          >
+                          <template x-if="user.deaf"
+                            ><span class="badge badge-red">deaf</span></template
+                          >
+                          <template x-if="user.suppress"
+                            ><span class="badge badge-amber"
+                              >suppress</span
+                            ></template
+                          >
+                        </div>
+                        <div class="flex items-center gap-1 flex-shrink-0">
+                          <button
+                            class="btn btn-ghost btn-sm"
+                            @click="moveUser(user)"
+                            title="Move"
+                          >
+                            <svg
+                              class="w-4 h-4"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                            >
+                              <polyline points="5 9 2 12 5 15" />
+                              <polyline points="9 5 12 2 15 5" />
+                              <polyline points="15 19 12 22 9 19" />
+                              <polyline points="19 9 22 12 19 15" />
+                              <line x1="2" y1="12" x2="22" y2="12" />
+                              <line x1="12" y1="2" x2="12" y2="22" />
+                            </svg>
+                          </button>
+                          <button
+                            class="btn btn-ghost btn-sm"
+                            :class="user.mute ? 'text-[var(--red)]' : ''"
+                            @click="toggleMute(user)"
+                            x-text="user.mute ? 'Unmute' : 'Mute'"
+                          ></button>
+                          <button
+                            class="btn btn-ghost btn-sm"
+                            :class="user.deaf ? 'text-[var(--red)]' : ''"
+                            @click="toggleDeafen(user)"
+                            x-text="user.deaf ? 'Undeafen' : 'Deafen'"
+                          ></button>
+                          <button
+                            class="btn btn-ghost btn-sm"
+                            :class="user.suppress ? 'text-[var(--amber)]' : ''"
+                            @click="toggleSuppress(user)"
+                            x-text="user.suppress ? 'Unsuppress' : 'Suppress'"
+                          ></button>
+                          <button
+                            class="btn btn-ghost btn-sm"
+                            :class="user.priority_speaker ? 'text-[var(--accent)]' : ''"
+                            @click="togglePriority(user)"
+                            x-text="user.priority_speaker ? '-Pri' : '+Pri'"
+                          ></button>
+                          <button
+                            class="btn btn-danger btn-sm"
+                            @click="kickUser(user)"
+                          >
+                            <svg
+                              class="w-4 h-4"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                            >
+                              <path
+                                d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
+                              />
+                              <polyline points="16 17 21 12 16 7" />
+                              <line x1="21" y1="12" x2="9" y2="12" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </template>
+          </div>
+
+          <!-- ═══ CHANNELS ═══ -->
+          <div x-show="page === 'channels'">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="font-semibold text-base">Channel Management</h2>
+              <button
+                class="btn btn-primary btn-sm"
+                @click="showAddChannel = true"
+              >
+                <svg
+                  class="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Add Channel
+              </button>
+            </div>
+
+            <template x-if="showAddChannel">
+              <div class="card mb-4" x-transition>
+                <div class="card-body">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label">Name</label>
+                      <input
+                        type="text"
+                        x-model="newChannel.name"
+                        placeholder="Channel name"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Parent</label>
+                      <select x-model="newChannel.parent">
+                        <option :value="0">Root</option>
+                        <template x-for="ch in channels" :key="ch.id">
+                          <option :value="ch.id" x-text="ch.name"></option>
+                        </template>
+                      </select>
+                    </div>
+                    <div class="flex gap-2 pt-5">
+                      <button
+                        class="btn btn-primary btn-sm"
+                        @click="addChannel()"
+                      >
+                        Create
+                      </button>
+                      <button
+                        class="btn btn-ghost btn-sm"
+                        @click="showAddChannel = false"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <template x-if="loading">
+              <div class="empty-state">
+                <svg
+                  class="w-8 h-8"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2m0 16v2M2 12h2m16 0h2" />
+                </svg>
+                <span class="text-sm">Loading channels...</span>
+              </div>
+            </template>
+            <template x-if="!loading && treeChannels.length === 0">
+              <div class="empty-state">
+                <svg
+                  class="w-8 h-8"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
+                  <path
+                    d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+                  />
+                </svg>
+                <span class="text-sm">No channels</span>
+              </div>
+            </template>
+            <template x-if="!loading && treeChannels.length > 0">
+              <div>
+                <template x-for="node in treeChannels" :key="'ach-'+node.id">
+                  <div :style="'padding-left: ' + (node.depth * 12) + 'px'">
+                    <div class="card mb-1">
+                      <div class="card-body py-2">
+                        <div class="flex items-center gap-2">
+                          <button
+                            class="flex-shrink-0 p-1 rounded-lg hover:bg-[var(--surface-2)]"
+                            @click="openChannels = symToggle(openChannels, node.id)"
+                            x-show="node.hasChildren"
+                          >
+                            <svg
+                              class="w-3.5 h-3.5 text-muted transition-transform duration-150"
+                              :class="{'rotate-90': openChannels.includes(node.id)}"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                            >
+                              <polyline points="9 18 15 12 9 6" />
+                            </svg>
+                          </button>
+                          <span
+                            class="w-5 flex-shrink-0"
+                            x-show="!node.hasChildren"
+                          ></span>
+                          <svg
+                            class="w-4 h-4 text-muted flex-shrink-0"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                          >
+                            <path
+                              d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+                            />
+                          </svg>
+                          <template x-if="editingChannel === node.id">
+                            <input
+                              class="inline-edit flex-1 min-w-0"
+                              x-model="editChannelName"
+                              @keydown.enter="saveChannelName(node.id)"
+                              @keydown.escape="editingChannel = null"
+                              @focus="$event.target.select()"
+                            />
+                          </template>
+                          <template x-if="editingChannel !== node.id">
+                            <span
+                              class="flex-1 min-w-0 truncate text-sm"
+                              x-text="node.name"
+                              @dblclick="editingChannel = node.id; editChannelName = node.name"
+                            ></span>
+                          </template>
+                          <span
+                            class="badge badge-muted text-[10px] px-1.5"
+                            x-text="node.userCount"
+                            x-show="node.userCount > 0"
+                          ></span>
+                          <button
+                            class="btn btn-ghost btn-sm flex-shrink-0"
+                            @click="editingChannel = node.id; editChannelName = node.name"
+                            title="Rename"
+                          >
+                            <svg
+                              class="w-3.5 h-3.5"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                            >
+                              <path
+                                d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                              />
+                              <path
+                                d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                              />
+                            </svg>
+                          </button>
+                          <button
+                            class="btn btn-danger btn-sm flex-shrink-0"
+                            @click="deleteChannel(node.id, node.name)"
+                            x-show="node.id !== 0"
+                            title="Delete"
+                          >
+                            <svg
+                              class="w-3.5 h-3.5"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                            >
+                              <polyline points="3 6 5 6 21 6" />
+                              <path
+                                d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- Children shown when expanded -->
+                    <div
+                      x-show="openChannels.includes(node.id)"
+                      class="pl-3"
+                    ></div>
+                  </div>
+                </template>
+              </div>
+            </template>
+          </div>
+
+          <!-- ═══ BANS ═══ -->
+          <div x-show="page === 'bans'">
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="font-semibold text-base">Ban Management</h2>
+              <button class="btn btn-primary btn-sm" @click="showAddBan = true">
+                <svg
+                  class="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Add Ban
+              </button>
+            </div>
+
+            <template x-if="showAddBan">
+              <div class="card mb-4" x-transition>
+                <div class="card-body">
+                  <div class="form-row">
+                    <div class="form-group">
+                      <label class="form-label">IP Address</label>
+                      <input
+                        type="text"
+                        x-model="newBan.address"
+                        placeholder="0.0.0.0"
+                      />
+                    </div>
+                    <div class="form-group max-w-[80px]">
+                      <label class="form-label">Bits</label>
+                      <input
+                        type="number"
+                        x-model.number="newBan.bits"
+                        value="32"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Name</label>
+                      <input
+                        type="text"
+                        x-model="newBan.name"
+                        placeholder="Username (optional)"
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label">Reason</label>
+                      <input
+                        type="text"
+                        x-model="newBan.reason"
+                        placeholder="Ban reason"
+                      />
+                    </div>
+                    <div class="form-group max-w-[100px]">
+                      <label class="form-label">Duration (h)</label>
+                      <input
+                        type="number"
+                        x-model.number="newBan.duration"
+                        placeholder="0 = perm"
+                      />
+                    </div>
+                    <div class="flex gap-2 pt-5">
+                      <button class="btn btn-primary btn-sm" @click="addBan()">
+                        Ban
+                      </button>
+                      <button
+                        class="btn btn-ghost btn-sm"
+                        @click="showAddBan = false"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <template x-if="bans.length === 0">
+              <div class="empty-state">
+                <svg
+                  class="w-8 h-8"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M8 12h8" />
+                </svg>
+                <span class="text-sm">No active bans</span>
+              </div>
+            </template>
+            <template x-if="bans.length > 0">
+              <div class="flex flex-col gap-2">
+                <template x-for="ban in bans" :key="ban.address + ban.bits">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                          <div
+                            class="avatar"
+                            style="
+                              background: var(--red-dim);
+                              color: var(--red);
+                            "
+                          >
+                            <svg
+                              class="w-4 h-4"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                            >
+                              <circle cx="12" cy="12" r="10" />
+                              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+                            </svg>
+                          </div>
+                          <div>
+                            <div
+                              class="mono text-sm font-medium"
+                              x-text="ban.address"
+                            ></div>
+                            <div class="text-xs text-secondary">
+                              <span x-text="ban.name || 'anyone'"></span>
+                              <template x-if="ban.reason"
+                                ><span
+                                  ><span class="text-muted">:</span>
+                                  <span x-text="ban.reason"></span></span
+                              ></template>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                          <span
+                            class="badge"
+                            :class="ban.duration === 0 ? 'badge-red' : 'badge-muted'"
+                            x-text="ban.duration === 0 ? 'permanent' : formatDate(ban.expires)"
+                          ></span>
+                          <button
+                            class="btn btn-danger btn-sm"
+                            @click="removeBan(ban)"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </template>
+          </div>
+
+          <!-- ═══ MESSAGES ═══ -->
+          <div x-show="page === 'messages'">
+            <h2 class="font-semibold text-base mb-4">Send Messages</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div class="card">
+                <div class="card-header">
+                  <span class="card-title">
+                    <svg
+                      class="w-4 h-4 inline mr-1.5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path
+                        d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
+                      />
+                    </svg>
+                    Whisper to User
+                  </span>
+                </div>
+                <div class="card-body">
+                  <div class="form-group">
+                    <label class="form-label">User</label>
+                    <select x-model.number="msgWhisper.session">
+                      <option :value="0">Select user</option>
+                      <template x-for="u in users" :key="u.session">
+                        <option :value="u.session" x-text="u.name"></option>
+                      </template>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Message</label>
+                    <textarea
+                      x-model="msgWhisper.text"
+                      placeholder="Type message..."
+                    ></textarea>
+                  </div>
+                  <button
+                    class="btn btn-primary btn-sm"
+                    @click="sendWhisper()"
+                    :disabled="!msgWhisper.session"
+                  >
+                    Send Whisper
+                  </button>
+                </div>
+              </div>
+              <div class="card">
+                <div class="card-header">
+                  <span class="card-title">
+                    <svg
+                      class="w-4 h-4 inline mr-1.5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path d="M22 2L11 13" />
+                      <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                    </svg>
+                    Broadcast to Channel
+                  </span>
+                </div>
+                <div class="card-body">
+                  <div class="form-group">
+                    <label class="form-label">Channel</label>
+                    <select x-model.number="msgBroadcast.channel_id">
+                      <option :value="0">Select channel</option>
+                      <template x-for="ch in channels" :key="ch.id">
+                        <option :value="ch.id" x-text="ch.name"></option>
+                      </template>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label
+                      class="flex items-center gap-2 cursor-pointer text-sm text-secondary"
+                    >
+                      <input
+                        type="checkbox"
+                        x-model="msgBroadcast.tree"
+                        class="w-auto"
+                      />Include subchannels
+                    </label>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Message</label>
+                    <textarea
+                      x-model="msgBroadcast.text"
+                      placeholder="Type message..."
+                    ></textarea>
+                  </div>
+                  <button
+                    class="btn btn-primary btn-sm"
+                    @click="sendBroadcast()"
+                    :disabled="!msgBroadcast.channel_id"
+                  >
+                    Broadcast
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ ACL ═══ -->
+          <div x-show="page === 'acl'">
+            <h2 class="font-semibold text-base mb-4">Access Control</h2>
+            <div class="card mb-4">
+              <div class="card-body">
+                <div class="form-group mb-0">
+                  <label class="form-label">Select Channel</label>
+                  <select x-model.number="aclChannelId" @change="fetchACL()">
+                    <option :value="0">Select channel</option>
+                    <template x-for="ch in channels" :key="ch.id">
+                      <option :value="ch.id" x-text="ch.name"></option>
+                    </template>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <template x-if="aclData">
+              <div>
+                <div class="font-semibold text-sm mb-2">ACL Rules</div>
+                <template x-if="aclData.acls.length">
+                  <div class="flex flex-col gap-2 mb-4">
+                    <template
+                      x-for="acl in aclData.acls"
+                      :key="acl.user_id + acl.group"
+                    >
+                      <div class="card">
+                        <div class="card-body">
+                          <div class="flex items-center justify-between mb-2">
+                            <span
+                              class="font-medium text-sm"
+                              x-text="acl.user_id ? 'User #' + acl.user_id : (acl.group || 'Everyone')"
+                            ></span>
+                            <div class="flex items-center gap-2">
+                              <span
+                                class="text-xs text-muted mono"
+                                x-text="(acl.apply_here ? 'H' : '') + (acl.apply_subs ? 'S' : '')"
+                              ></span>
+                              <template x-if="acl.inherited"
+                                ><span class="badge badge-muted text-[10px]"
+                                  >inherited</span
+                                ></template
+                              >
+                            </div>
+                          </div>
+                          <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs">
+                            <div class="flex items-center gap-1.5">
+                              <span class="text-muted">Allow:</span>
+                              <div class="flex gap-0.5 flex-wrap">
+                                <template x-for="p in acl.allow" :key="'a'+p">
+                                  <span
+                                    class="badge badge-blue text-[10px] px-1.5"
+                                    x-text="p"
+                                  ></span>
+                                </template>
+                              </div>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                              <span class="text-muted">Deny:</span>
+                              <div class="flex gap-0.5 flex-wrap">
+                                <template x-for="p in acl.deny" :key="'d'+p">
+                                  <span
+                                    class="badge badge-red text-[10px] px-1.5"
+                                    x-text="p"
+                                  ></span>
+                                </template>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+                </template>
+
+                <div class="font-semibold text-sm mb-2">Groups</div>
+                <template x-if="aclData.groups.length">
+                  <div class="flex flex-col gap-2 mb-4">
+                    <template x-for="g in aclData.groups" :key="g.name">
+                      <div class="card">
+                        <div class="card-body">
+                          <div class="flex items-center justify-between">
+                            <span
+                              class="font-medium text-sm"
+                              x-text="g.name"
+                            ></span>
+                            <span
+                              class="text-xs text-muted mono"
+                              x-text="(g.inherit ? 'I ' : '') + (g.inheritable ? 'E' : '')"
+                            ></span>
+                          </div>
+                          <div
+                            class="text-xs text-secondary mt-1"
+                            x-text="(g.members || []).join(', ') || '--'"
+                          ></div>
+                        </div>
+                      </div>
+                    </template>
+                  </div>
+                </template>
+              </div>
+            </template>
+
+            <div class="card mt-4">
+              <div class="card-header">
+                <span class="card-title">Permission Checker</span>
+              </div>
+              <div class="card-body">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label">User</label>
+                    <select x-model.number="permSession">
+                      <option :value="0">Select user</option>
+                      <template x-for="u in users" :key="u.session">
+                        <option :value="u.session" x-text="u.name"></option>
+                      </template>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Channel</label>
+                    <select x-model.number="permChannelId">
+                      <option :value="0">Select channel</option>
+                      <template x-for="ch in channels" :key="ch.id">
+                        <option :value="ch.id" x-text="ch.name"></option>
+                      </template>
+                    </select>
+                  </div>
+                  <button
+                    class="btn btn-primary btn-sm pt-5"
+                    @click="checkPermissions()"
+                  >
+                    Check
+                  </button>
+                </div>
+                <div x-show="permResult" class="flex gap-1 flex-wrap mt-3">
+                  <template x-for="p in permResult" :key="p">
+                    <span class="badge badge-blue" x-text="p"></span>
+                  </template>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ REGISTERED ═══ -->
+          <div x-show="page === 'registered'">
+            <h2 class="font-semibold text-base mb-4">Registered Users</h2>
+            <div class="card mb-4">
+              <div class="card-body">
+                <div class="form-group mb-0">
+                  <input
+                    type="text"
+                    x-model="regFilter"
+                    @input.debounce.500ms="fetchRegistered()"
+                    placeholder="Search by name..."
+                  />
+                </div>
+              </div>
+            </div>
+            <template x-if="registeredUsers.length > 0">
+              <div class="flex flex-col gap-2">
+                <template x-for="u in registeredUsers" :key="u.user_id">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                          <div
+                            class="avatar"
+                            :style="'background: ' + avatarColor(u.name)"
+                            x-text="u.name.charAt(0).toUpperCase()"
+                          ></div>
+                          <div>
+                            <div
+                              class="font-medium text-sm"
+                              x-text="u.name"
+                            ></div>
+                            <div
+                              class="mono text-xs text-muted"
+                              x-text="'#' + u.user_id"
+                            ></div>
+                          </div>
+                        </div>
+                        <button
+                          class="btn btn-ghost btn-sm"
+                          @click="viewRegistration(u.user_id)"
+                        >
+                          Details
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </template>
+            <template x-if="registeredUsers.length === 0 && regFilter === ''">
+              <div class="empty-state">
+                <svg
+                  class="w-8 h-8"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
+                  <path
+                    d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                  />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg>
+                <span class="text-sm"
+                  >No registered users or search to find them</span
+                >
+              </div>
+            </template>
+            <template x-if="registeredUsers.length === 0 && regFilter !== ''">
+              <div class="empty-state">
+                <span class="text-sm"
+                  >No users match "<span x-text="regFilter"></span>"</span
+                >
+              </div>
+            </template>
+
+            <template x-if="regDetail">
+              <div
+                class="modal-overlay"
+                @click.self="regDetail = null"
+                x-transition
+              >
+                <div class="modal">
+                  <div
+                    class="modal-title"
+                    x-text="regDetail?.name || 'User Details'"
+                  ></div>
+                  <div class="text-sm max-h-60 overflow-y-auto">
+                    <template x-for="(val, key) in regDetail || {}" :key="key">
+                      <div
+                        class="flex gap-2 py-1.5 border-b border-[var(--border)]"
+                      >
+                        <span
+                          class="text-muted min-w-[85px] text-xs"
+                          x-text="key"
+                        ></span>
+                        <span
+                          class="text-secondary break-all text-xs"
+                          x-text="val"
+                        ></span>
+                      </div>
+                    </template>
+                  </div>
+                  <div class="modal-actions">
+                    <button
+                      class="btn btn-ghost btn-sm"
+                      @click="regDetail = null"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+
+          <!-- ═══ CONFIG ═══ -->
+          <div x-show="page === 'config'">
+            <h2 class="font-semibold text-base mb-4">Server Configuration</h2>
+            <template x-if="loadingConfig">
+              <div class="empty-state">
+                <svg
+                  class="w-8 h-8"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2m0 16v2M2 12h2m16 0h2" />
+                </svg>
+                <span class="text-sm">Loading configuration...</span>
+              </div>
+            </template>
+            <template x-if="!loadingConfig">
+              <div class="flex flex-col gap-2">
+                <template x-for="(val, key) in serverConfig" :key="key">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="flex items-center justify-between gap-3">
+                        <span
+                          class="mono text-sm font-medium"
+                          x-text="key"
+                        ></span>
+                        <div
+                          class="flex items-center gap-2 flex-1 justify-end min-w-0"
+                        >
+                          <template x-if="editableKeys.includes(key)">
+                            <div
+                              class="flex items-center gap-2 flex-1 justify-end"
+                            >
+                              <input
+                                class="inline-edit max-w-xs"
+                                :value="editConfig[key] !== undefined ? editConfig[key] : val"
+                                @blur="editConfig[key] = $event.target.value"
+                              />
+                              <template
+                                x-if="editConfig[key] !== undefined && editConfig[key] !== val"
+                              >
+                                <button
+                                  class="btn btn-primary btn-sm flex-shrink-0"
+                                  @click="saveConfig(key, editConfig[key])"
+                                >
+                                  Save
+                                </button>
+                              </template>
+                            </div>
+                          </template>
+                          <template x-if="!editableKeys.includes(key)">
+                            <span
+                              class="text-secondary break-all text-sm"
+                              x-text="val"
+                            ></span>
+                          </template>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+              </div>
+            </template>
+          </div>
+        </div>
+      </main>
+
+      <!-- ═══ KICK MODAL ═══ -->
+      <template x-if="kickModal">
+        <div class="modal-overlay" @click.self="kickModal = false" x-transition>
+          <div class="modal">
+            <div class="modal-title">
+              Kick <span x-text="kickModal?.name"></span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Reason</label>
+              <textarea
+                x-model="kickReason"
+                placeholder="Kick reason..."
+              ></textarea>
+            </div>
+            <div class="modal-actions">
+              <button class="btn btn-ghost btn-sm" @click="kickModal = false">
+                Cancel
+              </button>
+              <button class="btn btn-danger btn-sm" @click="confirmKick()">
+                Kick
+              </button>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <!-- ═══ MOVE MODAL ═══ -->
+      <template x-if="moveModal">
+        <div class="modal-overlay" @click.self="moveModal = false" x-transition>
+          <div class="modal">
+            <div class="modal-title">
+              Move <span x-text="moveModal?.name"></span>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Channel</label>
+              <select x-model.number="moveChannelId">
+                <template x-for="ch in channels" :key="ch.id">
+                  <option :value="ch.id" x-text="ch.name"></option>
+                </template>
+              </select>
+            </div>
+            <div class="modal-actions">
+              <button class="btn btn-ghost btn-sm" @click="moveModal = false">
+                Cancel
+              </button>
+              <button class="btn btn-primary btn-sm" @click="confirmMove()">
+                Move
+              </button>
+            </div>
+          </div>
+        </div>
+      </template>
+
+      <div class="toast-container">
+        <template x-for="toast in toasts" :key="toast.id">
+          <div
+            class="toast"
+            :class="toast.type"
+            x-text="toast.message"
+            x-transition
+          ></div>
+        </template>
+      </div>
+    </div>
+
+    <script>
+      function adminApp() {
+        const colors = [
+          "#6c8cff",
+          "#34d399",
+          "#f87171",
+          "#fbbf24",
+          "#a78bfa",
+          "#22d3ee",
+          "#fb7185",
+          "#f59e0b",
+        ];
+        return {
+          sidebarOpen: false,
+          page: "overview",
+          loading: true,
+          users: [],
+          channels: [],
+          bans: [],
+          stats: { version: "", uptime: 0 },
+          toasts: [],
+          toastId: 0,
+          kickModal: null,
+          kickReason: "",
+          moveModal: null,
+          moveChannelId: 0,
+          showAddChannel: false,
+          newChannel: { name: "", parent: 0 },
+          showAddBan: false,
+          newBan: { address: "", bits: 32, name: "", reason: "", duration: 0 },
+          msgWhisper: { session: 0, text: "" },
+          msgBroadcast: { channel_id: 0, tree: false, text: "" },
+          aclChannelId: 0,
+          aclData: null,
+          permSession: 0,
+          permChannelId: 0,
+          permResult: null,
+          regFilter: "",
+          registeredUsers: [],
+          regDetail: null,
+          loadingConfig: true,
+          serverConfig: {},
+          editConfig: {},
+          editableKeys: [
+            "welcometext",
+            "banreason",
+            "registername",
+            "kickreason",
+            "log_max",
+            "allowhtml",
+            "autoacceptrecordings",
+          ],
+          autoScroll: true,
+          logEntries: [],
+          openChannels: [],
+          editingChannel: null,
+          editChannelName: "",
+
+          get pageTitle() {
+            const map = {
+              overview: "System Overview",
+              users: "User Management",
+              channels: "Channels",
+              bans: "Bans",
+              messages: "Messages",
+              acl: "ACL & Groups",
+              registered: "Registered Users",
+              config: "Configuration",
+            };
+            return map[this.page] || "Admin";
+          },
+
+          get uptimeText() {
+            return formatDuration(this.stats.uptime);
+          },
+
+          // Build flat tree with depth for rendering
+          get treeChannels() {
+            if (!this.channels.length) return [];
+            const chMap = {};
+            this.channels.forEach((c) => {
+              chMap[c.id] = { ...c, children: [] };
+            });
+            const roots = [];
+            Object.values(chMap).forEach((c) => {
+              if (c.parent === 0 || !chMap[c.parent]) {
+                roots.push(c);
+              } else {
+                chMap[c.parent].children.push(c);
+              }
+            });
+            const result = [];
+            const walk = (ch, depth) => {
+              ch.depth = depth;
+              ch.userCount = this.users.filter(
+                (u) => u.channel_id === ch.id,
+              ).length;
+              ch.hasChildren = ch.children.length > 0;
+              result.push(ch);
+              ch.children
+                .sort((a, b) => a.position - b.position)
+                .forEach((child) => walk(child, depth + 1));
+            };
+            roots.sort((a, b) => a.position - b.position);
+            roots.forEach((r) => walk(r));
+            return result;
+          },
+
+          init() {
+            this.fetchAll();
+            setInterval(() => {
+              if (this.page === "users") this.fetchUsers();
+            }, 10000);
+            setInterval(() => this.fetchLog(), 5000);
+            setInterval(() => {
+              this.fetchStats();
+            }, 30000);
+          },
+
+          async fetchAll() {
+            await Promise.all([
+              this.fetchUsers(),
+              this.fetchChannels(),
+              this.fetchBans(),
+              this.fetchConfig(),
+              this.fetchStats(),
+              this.fetchLog(),
+            ]);
+            this.loading = false;
+          },
+
+          async fetchUsers() {
+            try {
+              this.users = await getJSON("/api/users");
+            } catch (e) {}
+          },
+          async fetchChannels() {
+            try {
+              this.channels = await getJSON("/api/channels");
+            } catch (e) {}
+          },
+          async fetchBans() {
+            try {
+              const r = await getJSON("/api/bans");
+              if (r) this.bans = r.bans || [];
+            } catch (e) {}
+          },
+          async fetchStats() {
+            try {
+              const r = await getJSON("/api/stats");
+              if (r) this.stats = r.stats || r;
+            } catch (e) {}
+          },
+          async fetchLog() {
+            try {
+              const r = await getJSON("/api/log?first=0&last=200");
+              if (r && r.entries) {
+                const existing = new Set(
+                  this.logEntries.map((l) => l.timestamp),
+                );
+                this.logEntries = [
+                  ...this.logEntries,
+                  ...r.entries.filter((e) => !existing.has(e.timestamp)),
+                ].slice(-200);
+                if (this.autoScroll && this.$refs.logBody)
+                  this.$refs.logBody.scrollTop =
+                    this.$refs.logBody.scrollHeight;
+              }
+            } catch (e) {}
+          },
+          async fetchConfig() {
+            this.loadingConfig = true;
+            try {
+              this.serverConfig = await getJSON("/api/admin/config");
+            } catch (e) {}
+            this.loadingConfig = false;
+          },
+
+          channelName(id) {
+            const ch = this.channels.find((c) => c.id === id);
+            return ch ? ch.name : "Root";
+          },
+
+          avatarColor(name) {
+            if (!name) return "var(--surface-3)";
+            let h = 0;
+            for (let i = 0; i < name.length; i++)
+              h = name.charCodeAt(i) + ((h << 5) - h);
+            return colors[Math.abs(h) % colors.length];
+          },
+
+          logLevel(text) {
+            const t = text.toLowerCase();
+            if (t.includes("connect") || t.includes("welcome"))
+              return "success";
+            if (t.includes("error") || t.includes("fail")) return "error";
+            if (t.includes("ban") || t.includes("kick")) return "warn";
+            return "info";
+          },
+
+          symToggle(arr, val) {
+            const i = arr.indexOf(val);
+            return i >= 0 ? arr.filter((v) => v !== val) : [...arr, val];
+          },
+
+          // User actions
+          kickUser(user) {
+            this.kickModal = user;
+            this.kickReason = "";
+          },
+          async confirmKick() {
+            try {
+              await postJSON("/api/admin/kick", {
+                session: this.kickModal.session,
+                reason: this.kickReason || "kicked",
+              });
+              this.toast("Kicked " + this.kickModal.name, "success");
+              this.kickModal = null;
+              this.fetchUsers();
+            } catch (e) {
+              this.toast("Error: " + e.message, "error");
+            }
+          },
+          moveUser(user) {
+            this.moveModal = user;
+            this.moveChannelId = user.channel_id;
+          },
+          async confirmMove() {
+            try {
+              await postJSON("/api/admin/set-state", {
+                session: this.moveModal.session,
+                channel: this.moveChannelId,
+                mute: false,
+                deaf: false,
+                suppress: false,
+                priority: false,
+              });
+              this.toast("Moved " + this.moveModal.name, "success");
+              this.moveModal = null;
+              this.fetchUsers();
+            } catch (e) {
+              this.toast("Error: " + e.message, "error");
+            }
+          },
+          async toggleMute(user) {
+            await this.setState(user, "mute");
+          },
+          async toggleDeafen(user) {
+            await this.setState(user, "deaf");
+          },
+          async toggleSuppress(user) {
+            await this.setState(user, "suppress");
+          },
+          async togglePriority(user) {
+            await this.setState(user, "priority");
+          },
+          async setState(user, field) {
+            try {
+              await postJSON("/api/admin/set-state", {
+                session: user.session,
+                channel: user.channel_id,
+                mute: field === "mute" ? !user.mute : user.mute,
+                deaf: field === "deaf" ? !user.deaf : user.deaf,
+                suppress: field === "suppress" ? !user.suppress : user.suppress,
+                priority:
+                  field === "priority"
+                    ? !user.priority_speaker
+                    : user.priority_speaker,
+              });
+              this.fetchUsers();
+            } catch (e) {
+              this.toast("Error: " + e.message, "error");
+            }
+          },
+
+          // Channel actions
+          async addChannel() {
+            if (!this.newChannel.name) return;
+            try {
+              await postJSON("/api/admin/add-channel", this.newChannel);
+              this.toast("Channel created", "success");
+              this.newChannel = { name: "", parent: 0 };
+              this.showAddChannel = false;
+              this.fetchChannels();
+            } catch (e) {
+              this.toast("Error: " + e.message, "error");
+            }
+          },
+          async saveChannelName(id) {
+            try {
+              await postJSON("/api/admin/set-channel", {
+                id,
+                name: this.editChannelName,
+              });
+              this.toast("Channel renamed", "success");
+              this.editingChannel = null;
+              this.fetchChannels();
+            } catch (e) {
+              this.toast("Error: " + e.message, "error");
+            }
+          },
+          async deleteChannel(id, name) {
+            if (!confirm('Delete channel "' + name + '"?')) return;
+            try {
+              await postJSON("/api/admin/remove-channel", { id });
+              this.toast("Channel deleted", "success");
+              this.fetchChannels();
+            } catch (e) {
+              this.toast("Error: " + e.message, "error");
+            }
+          },
+
+          // Ban actions
+          async addBan() {
+            if (!this.newBan.address) return;
+            try {
+              await postJSON("/api/admin/add-ban", {
+                ...this.newBan,
+                duration: this.newBan.duration * 3600,
+              });
+              this.toast("Ban added", "success");
+              this.newBan = {
+                address: "",
+                bits: 32,
+                name: "",
+                reason: "",
+                duration: 0,
+              };
+              this.showAddBan = false;
+              this.fetchBans();
+            } catch (e) {
+              this.toast("Error: " + e.message, "error");
+            }
+          },
+          async removeBan(ban) {
+            try {
+              await postJSON("/api/admin/remove-ban", {
+                address: ban.address,
+                bits: ban.bits,
+              });
+              this.toast("Ban removed", "success");
+              this.fetchBans();
+            } catch (e) {
+              this.toast("Error: " + e.message, "error");
+            }
+          },
+
+          // Messages
+          async sendWhisper() {
+            if (!this.msgWhisper.session || !this.msgWhisper.text) return;
+            try {
+              await postJSON("/api/admin/send-message", this.msgWhisper);
+              this.toast("Message sent", "success");
+              this.msgWhisper.text = "";
+            } catch (e) {
+              this.toast("Error: " + e.message, "error");
+            }
+          },
+          async sendBroadcast() {
+            if (!this.msgBroadcast.channel_id || !this.msgBroadcast.text)
+              return;
+            try {
+              await postJSON(
+                "/api/admin/send-message-channel",
+                this.msgBroadcast,
+              );
+              this.toast("Broadcast sent", "success");
+              this.msgBroadcast.text = "";
+            } catch (e) {
+              this.toast("Error: " + e.message, "error");
+            }
+          },
+
+          // ACL
+          async fetchACL() {
+            if (!this.aclChannelId) return;
+            try {
+              this.aclData = await getJSON(
+                "/api/admin/acl?channelid=" + this.aclChannelId,
+              );
+            } catch (e) {
+              this.toast("Error: " + e.message, "error");
+            }
+          },
+          async checkPermissions() {
+            if (!this.permSession || !this.permChannelId) return;
+            try {
+              const r = await getJSON(
+                "/api/admin/permissions?session=" +
+                  this.permSession +
+                  "&channelid=" +
+                  this.permChannelId,
+              );
+              this.permResult = r.permissions || r;
+            } catch (e) {
+              this.toast("Error: " + e.message, "error");
+            }
+          },
+
+          // Registered
+          async fetchRegistered() {
+            try {
+              const url =
+                "/api/admin/registered" +
+                (this.regFilter
+                  ? "?filter=" + encodeURIComponent(this.regFilter)
+                  : "");
+              const r = await getJSON(url);
+              this.registeredUsers = r.users || r || [];
+            } catch (e) {}
+          },
+          async viewRegistration(userId) {
+            try {
+              this.regDetail = await getJSON(
+                "/api/admin/registration?id=" + userId,
+              );
+            } catch (e) {
+              this.toast("Error: " + e.message, "error");
+            }
+          },
+
+          // Config
+          async saveConfig(key, value) {
+            try {
+              await postJSON("/api/admin/config", { key, value });
+              this.serverConfig[key] = value;
+              this.toast("Config saved", "success");
+              delete this.editConfig[key];
+            } catch (e) {
+              this.toast("Error: " + e.message, "error");
+            }
+          },
+
+          toast(message, type = "success") {
+            const id = ++this.toastId;
+            this.toasts.push({ id, message, type });
+            setTimeout(() => {
+              this.toasts = this.toasts.filter((t) => t.id !== id);
+            }, 3000);
+          },
+        };
+      }
+
+      async function getJSON(url) {
+        const r = await fetch(url);
+        if (!r.ok) throw new Error(r.statusText);
+        return r.json();
+      }
+      async function postJSON(url, body) {
+        const r = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        if (!r.ok) {
+          const e = await r.json().catch(() => ({}));
+          throw new Error(e.error || r.statusText);
+        }
+        return r.json();
+      }
+      function formatDuration(secs) {
+        if (!secs || secs < 60) return secs + "s";
+        const m = Math.floor(secs / 60);
+        if (m < 60) return m + "m";
+        const h = Math.floor(m / 60);
+        if (h < 24) return h + "h " + (m % 60) + "m";
+        const d = Math.floor(h / 24);
+        return d + "d " + (h % 24) + "h";
+      }
+      function formatTime(ts) {
+        const d = new Date(ts * 1000);
+        return d.toLocaleTimeString("en-US", { hour12: false });
+      }
+      function formatDate(ts) {
+        if (!ts) return "--";
+        const d = new Date(ts * 1000);
+        return d.toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+    </script>
+  </body>
+</html>
